@@ -80,7 +80,6 @@ def extract_protocols_and_cipher_suites(results):
             del extracted_tls_and_cipher_results['ciphers']   
     return extracted_tls_and_cipher_results
 def extract_certs_info(results):
-    
     pass
-results_no_treatment = results_from_cache('sistemas.mrv.com.br')
+results_no_treatment = results_from_cache('site')
 print(extract_protocols_and_cipher_suites(results_no_treatment))
