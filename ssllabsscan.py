@@ -55,28 +55,32 @@ def new_scan(host, publish='off', startNew='on', all='done', ignoreMismatch='on'
     return results
 
 def extract_protocols_and_cipher_suites(results):
-    extracted_results = {}
-    extracted_results['host'] = results['host']
+    extracted_tls_and_cipher_results = {}
+    extracted_tls_and_cipher_results['host'] = results['host']
     for key,value in results['endpoints'][0].items():
         if key in ('ipAddress', 'grade'):
-            extracted_results[key] = value
+            extracted_tls_and_cipher_results[key] = value
         elif key == 'details':
-            extracted_results['tls'] = value['protocols']
-            tls_versions = [protocol['version'] for protocol in extracted_results['tls']]
-            extracted_results['tls'] = tls_versions
+            extracted_tls_and_cipher_results['tls'] = value['protocols']
+            tls_versions = [protocol['version'] for protocol in extracted_tls_and_cipher_results['tls']]
+            extracted_tls_and_cipher_results['tls'] = tls_versions
 
-            extracted_results['ciphers'] = value['suites']
+            extracted_tls_and_cipher_results['ciphers'] = value['suites']
             cipher_no = 1
-            for value in extracted_results['ciphers']:
+            for value in extracted_tls_and_cipher_results['ciphers']:
                 for cipher in value['list']:
-                    extracted_results[f'cipher_{cipher_no}'] = [cipher['name']]
-                    if 'q' in cipher:
-                        extracted_results[f'cipher_{cipher_no}'].append('cifra fraca')
-                    else:
-                        extracted_results[f'cipher_{cipher_no}'].append('cifra forte')
+                    extracted_tls_and_cipher_results[f'cipher_{cipher_no}'] = [cipher['name']]
+                    if cipher.get('q') == 1:
+                        extracted_tls_and_cipher_results[f'cipher_{cipher_no}'].append('cifra fraca')
+                    elif cipher.get('q') == 0:
+                        extracted_tls_and_cipher_results[f'cipher_{cipher_no}'].append('cifra insegura')
+                    elif cipher.get('q') == None:
+                        extracted_tls_and_cipher_results[f'cipher_{cipher_no}'].append('cifra forte ou boa')
                     cipher_no += 1 
-            del extracted_results['ciphers']   
-    return extracted_results
-
-
-#print(extract_protocols_and_cipher_suites(results))
+            del extracted_tls_and_cipher_results['ciphers']   
+    return extracted_tls_and_cipher_results
+def extract_certs_info(results):
+    
+    pass
+results_no_treatment = results_from_cache('sistemas.mrv.com.br')
+print(extract_protocols_and_cipher_suites(results_no_treatment))
